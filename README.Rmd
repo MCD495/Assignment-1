@@ -9,6 +9,8 @@ output: md_document
 I love Octocat. She’s the coolest cat in town.
 
 ![](https://dl.dropboxusercontent.com/u/11805474/painblogr/biostats/assignments/octocat.png)
+
+#Assignment 2
 ```{r quick_look, echo=TRUE}
 data("anscombe")
 dim(anscombe)
@@ -18,12 +20,362 @@ tail(anscombe)
 summary(anscombe)
 
 ```
-
+#Assignment 3
 ```{r xy_plot, echo= FALSE, fig.height= 8, fig.width= 8, fig.align='center', dev='svg', fig.path= './figures/'}
 data("anscombe")
 anscombe
 with(anscombe, plot(x1, y1))
 abline(lm(y1 ~ x1, data = anscombe))
 
+```
+Figure 1: represents a scatter plot of x1 vs y1 from the anscombe data, fitted with y1 vs x1 regression line
+
+#Assignment 4
+```{r data_import, echo}
+library(readr)
+# Read from dropbox using url, and import into using read_csv to convert into a dataframe
+df <- read.csv("https://dl.dropboxusercontent.com/u/11805474/painblogr/biostats/assignments/analgesic.csv")
 
 ```
+
+```{r data_summary, echo}
+# Explore the contents of df
+dim(df)
+colnames(df)
+head(df)
+tail(df)
+summary(df)
+```
+
+```{r data_tidy, echo= TRUE}
+#Loading packages
+
+library(tidyr)
+library(dplyr)
+
+df.tidying <- df %>%
+  
+   #Tidy up df data from wide to long 
+  
+    
+   gather(key = Measurement, value = value, 3:5) %>%
+  
+  
+   #Now group data by the ID column
+  
+    
+    group_by(Group, ID) %>%
+    
+  #NOW Summarize  mean value each individual's measurements
+  
+    summarise(mean(value))
+
+  #Print out the tidied long formatted final data frame
+
+   print(df.tidying)
+
+
+
+
+```
+
+#Assignment 5
+
+####Chicken weights
+
+**Null hypothesis:**There is no relationship between feed type supplement and chiken weight.
+
+**Alternative hypothesis:**There is a relationship between feed type supplement and chiken weight.
+
+##exploring the data set provided
+
+```{r chicken (chunk 1), echo=TRUE} 
+# Loading of packages
+
+library(dplyr)
+library(knitr)
+library(readr)
+library(ggplot2)
+library(tidyr)
+
+#Import data
+
+df_chkn <- read.csv("Chick-Weights.csv") 
+
+#print out the imported data set
+print(df_chkn)
+
+#1summarise data
+
+summ <-  group_by(df_chkn, feed) %>% 
+summarise(sample_size= n(), mean=mean(weight), sd= sd(weight), minimum= min(weight), lower_quatile = quantile(weight, 0.25), median= median(weight), upper_quartile= quantile(weight, 0.75), maximum = max(weight))
+
+summ
+
+#Constructing a boxplot chart
+
+with(df_chkn, boxplot(weight ~ feed))
+
+#2constructing a boxplot
+qplot(x= feed, y= weight, data =df_chkn, geom= "boxplot") + stat_summary(fun.y = "mean", geom= "point", color= "blue")
+
+
+#3 Statistical test (ANOVA)
+foo<- aov(weight~feed, data= df_chkn)
+summary(foo)
+
+
+#Pairwise Post-hoc test.
+pairwise.t.test(df_chkn$weight,df_chkn$feed, p.adjust.method = 'holm', paired= FALSE)
+
+
+```
+
+#Analysis
+
+1.Table showing the summarised information of chick-weights data
+
+Assumption...
+
+The data is unpaired, parametric [-1 <mean-median< 1] with more than two sample groups, data are continuous and the errors are independent. Hence, one- way ANOVA can be used to test the hypothesis
+
+
+2.By looking at the boxplot we have reason to believe that a difference between feed type and weight, however, the overlapping of the boxplots provides an incoclusive decision.
+
+3.Test statistics
+ 
+Before continuing with statistical test it is crucial to note that significance level is set at 5%
+
+
+It can be seen that F-value is 15.37, degrees of freedom is 5 and p- value= 5.94e-10. 
+Therefore, we have sufficient information to reject the null hypothesis, hence, we conclude that there is a relationship between feed type supplement and chiken weight.
+Finally, the data doesn't show if the p-value of each group is significant, so to better understand the reasons for rejecting the null hypothesis, a pairwise.t.test was run. According to the Pairwise comparisons using t tests with pooled SD, the comparisons between horsebean-casein, horsebean-linseed, soybean-casein, horsebean-soybean, sunflower-horsebean and sunflower are statistically significant while there is no significance in feed type compared to meatmeal. Although there is insufficient support to distinguish between meatmeal and  the other feed types, meatmeal could be superior than the other feed supplements and horsebean could be the worst.
+
+
+
+####The hot zone
+
+**Null hypothesis:**There is no relationship between drinking contaminated water and the severe gastroenteritis outbreak
+
+**Alternative hypothesis:**There is a relationship between drinking contaminated water and the severe gastroenteritis outbreak
+
+To test the null hypothesis, statistical significance is set at p < 0.05
+```{r The_hot.zone (chunk 2), echo=TRUE} 
+# Loading of packages
+
+library(dplyr)
+library(knitr)
+library(readr)
+library(ggplot2)
+library(tidyr)
+
+
+#import data
+
+df_gastron <- read.csv("gastroenteritis.csv")  
+
+#Print the imported data 
+print(df_gastron)
+
+#1 Tabulate data
+
+df.new_table<- table(df_gastron$Consumption, df_gastron$Outcome)
+
+#Print the Tidied and tabulated  data
+
+print(df.new_table)
+
+#2.1 Fisher's test
+ 
+Hot_zone <- fisher.test(df.new_table)
+
+#Print results
+print(Hot_zone)
+
+#2.2 Chi-sqaure test
+Chisqt<- chisq.test(df.new_table)
+
+#Print results
+print(Chisqt)
+
+
+
+```
+#Analysis
+
+1. The table shows that the data is unpaired, ordinal and non-parametric. Therefore, a fisher's exact test can be used to test the null hypothesis. However, a fisher's test is traditionally used for 2x2 contigency table. Although, it provided an exact p-value, a   
+ chi-spquare is an appropriate test that can be used to test the null hypothesis. Moreover, the table is a 2x3 table and hence, making the chi-square more appropriate to be used to calculate the probability of the observed frquencies.
+
+2. It can be seen from 2.1 the fisher's test and 2.2 Pearson's Chi-squared test, the p-value is 2.2e-16. Therefore, we reject the null hypothesis and conclude that there is a relationship between drinking contaminated water and the severe gastroenteritis outbreak.
+
+#X-squared = 74.925, df = 2,  further supports the rejection of the null hypothesis.
+
+
+####Nausea
+
+**Null hypothesis:**The rate intesity of nausea in breast cancer patients is not affected byadministration of a 5HT3-receptor blocker
+
+**Alternative hypothesis:**The rate intesity of nausea in breast cancer patients is reduced by administering a 5HT3-receptor blocker.
+
+To test the null hypothesis, statistical significance is set at p < 0.05
+
+
+```{r Nausea (chunk 3), echo=TRUE} 
+
+# Loading of packages
+
+library(dplyr)
+library(knitr)
+library(readr)
+library(ggplot2)
+library(tidyr)
+
+
+#import data
+
+df_nausea <- read.csv("nausea.csv")          
+
+#The data is already in a long format, no need for tidying 
+
+#print the imported data
+print(df_nausea)
+
+#gather data and rearrage data
+df_nausea <- df_nausea %>%
+    mutate(Patient = factor(Patient)) %>%
+    gather(key = key, value = value, -Patient) %>%
+    arrange(Patient)
+
+
+
+#2.1 Ploting data set on boxplots and 2.2 ggplot
+
+#2.1
+
+with(df_nausea, boxplot(value ~ key))
+
+#2.2 
+
+ggplot(data = df_nausea, aes(x = key, y = value)) +
+    geom_boxplot(geom ="point",col= "red")
+
+#3.Wilcoxon signed-rank test
+
+WIltest<-wilcox.test(value ~ key, paired = TRUE, data = df_nausea)
+
+#Print the results of the wilcoxon test.
+
+WIltest
+
+```
+
+#Analysis
+
+1.According to the table, the data is non-parametric and paired . Hence, a wilcoxon signed-rank test will be used to test the null hypothesis. Furthermore, the data has independent errors and central theorem applies.
+
+2. The boxplot shows that rate intesity of nausea was reduced after the administration of a 5HT3-receptor blocker. However, a conclusion cannot be based solely on the boxplots, hence, the wilcox test is performed.
+
+3. According to the Wilcoxon signed-rank test, p-value= 0.2906, therefore, there is insufficient information to reject the null hypothesis. We conclude that the rate intesity of nausea in breast cancer patients is not affected by administering a 5HT3-receptor blocker.
+
+#Assignment 6
+
+####Housing-prices
+
+**Null hypothesis:**There is no association between interest rate and housing prices in USA 
+
+**Alternative hypothesis:**There is a negative association between interest rate and housing prices in USA
+
+To test the null hypothesis, statistical significance is set at p < 0.05
+
+##Assumptions
+
+**1. Pearson's correlation**
+
+There should be outliers
+Data should be normally distributed
+The dependent and non dependent variables should be linearly related
+Variables should be measured on intervals
+
+**Linear Regression**
+
+There should be a linear relationship between x and y variables
+Data should be normally distributed
+The independent variable should be measured without an error
+There should be independent observations.
+
+
+
+```{r Housing_prices(chunk 1), echo}
+#loading packages
+
+library(dplyr)
+library(knitr)
+library(ggplot2)
+library(tidyr)
+
+
+#import data
+
+df_housing <- read.csv("housing-prices.csv")          
+
+#print (df_housing)
+
+df_housing
+
+#clean data by removing the raw with NA
+
+df.new_housing <- df_housing[complete.cases(df_housing),]
+
+#print(df.new_housing)
+df.new_housing
+
+
+#Plot the tidied dataset
+with(df.new_housing, plot(y= median_house_price_USD, x= interest_rate, main = "scatter plot of interest rate vs house price", col= "red", ylim = c(150000, 400000), xlim = c(5,10)))
+
+#plot a ggplot of the tidied data
+
+ggplot(df.new_housing, aes(y= median_house_price_USD, x= interest_rate)) +  geom_point() 
+
+#Conduct a pearsons correlation
+df.new_housingtest <- with(df.new_housing, cor.test(y= median_house_price_USD, x= interest_rate,method = 'pearson', main = "pearsons correlation of interest rate vs house price", col= "red", ylim = c(150000, 400000), xlim = c(5,10)))
+
+#print out the pearson's test
+print(df.new_housingtest)
+
+##Data analysis
+
+
+#conduct a linear regression and its summary
+
+df.new_housingtest <- lm( median_house_price_USD~interest_rate, data= df.new_housing)
+
+summary(df.new_housingtest)
+
+#Add regression line
+
+abline(df.new_housingtest, lty= 5)
+
+
+##Conduct diagnostic plots and graphics
+
+#checking for homoskedasticity
+
+plot(x=df.new_housingtest$fitted, y=df.new_housingtest$residuals)
+abline(h=0)
+
+#check for normality by plotting(qq-plot)
+
+qqnorm(df.new_housingtest$residuals)
+qqline(df.new_housingtest$residuals)
+
+
+```
+
+### Anaysis
+
+
+
+The pearson correlation shows an inverse relationship of (with r= -0.6). A p value of 0.01937 indicates that the null hypothesis is rejected. furthermore, There is no linear relationship between variables, and the diagnostic tests show no gaussian or homoskedasticity distribution of residuals. Both these parameters are the required assumptions for linear regression test. Furthermore, the p-value thus leads to a conclusion that interest rate is negatively associated with housing prices.
+
+#T = -2.6409, df = 14, p-value = 0.01937
