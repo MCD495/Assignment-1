@@ -305,7 +305,7 @@ There should be independent observations.
 
 
 
-```{r Housing_prices(chunk 1), echo}
+```{r Housing_prices (chunk 1), echo=TRUE}
 #loading packages
 
 library(dplyr)
@@ -333,9 +333,6 @@ df.new_housing
 #Plot the tidied dataset
 with(df.new_housing, plot(y= median_house_price_USD, x= interest_rate, main = "scatter plot of interest rate vs house price", col= "red", ylim = c(150000, 400000), xlim = c(5,10)))
 
-#plot a ggplot of the tidied data
-
-ggplot(df.new_housing, aes(y= median_house_price_USD, x= interest_rate)) +  geom_point() 
 
 #Conduct a pearsons correlation
 df.new_housingtest <- with(df.new_housing, cor.test(y= median_house_price_USD, x= interest_rate,method = 'pearson', main = "pearsons correlation of interest rate vs house price", col= "red", ylim = c(150000, 400000), xlim = c(5,10)))
@@ -379,3 +376,5 @@ qqline(df.new_housingtest$residuals)
 The pearson correlation shows an inverse relationship of (with r= -0.6). A p value of 0.01937 indicates that the null hypothesis is rejected. furthermore, There is no linear relationship between variables, and the diagnostic tests show no gaussian or homoskedasticity distribution of residuals. Both these parameters are the required assumptions for linear regression test. Furthermore, the p-value thus leads to a conclusion that interest rate is negatively associated with housing prices.
 
 #T = -2.6409, df = 14, p-value = 0.01937
+
+
